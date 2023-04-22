@@ -6,14 +6,14 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 
-	@SpringBootApplication
-	public class NlMessageBotApplication {
+@SpringBootApplication
+public class NlMessageBotApplication {
 
-		public static void main(String[] args) throws ClientException, ApiException {
+    public static void main(String[] args) throws ClientException, ApiException {
 
-		SpringApplication.run(NlMessageBotApplication.class, args);
+        SpringApplication.run(NlMessageBotApplication.class, args);
 
 
-	}
+    }
 
 }

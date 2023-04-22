@@ -4,18 +4,29 @@ import com.vk.api.sdk.client.VkApiClient;
 import com.vk.api.sdk.client.actors.UserActor;
 import com.vk.api.sdk.httpclient.HttpTransportClient;
 
-public  class VKAdapter {
+public class VKAdapter {
 
-
-    public static UserActor getActor() {
+    public UserActor getActor() {
         return actor;
     }
-    private static UserActor actor;
-    private static int id;
-    private static String token;
+
+    private UserActor actor;
+
+    public int getId() {
+        return id;
+    }
+
+    private int id;
+
+    public String getToken() {
+        return token;
+    }
+
+    private String token;
+
     public VKAdapter(int id, String token) {
-        actor= new UserActor(id,token);
-        this.id=id;
-        this.token=token;
+        actor = new UserActor(id, token);
+        this.id = id;
+        this.token = token;
     }
 }
