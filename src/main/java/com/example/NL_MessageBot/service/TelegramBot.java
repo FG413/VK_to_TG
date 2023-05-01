@@ -1,5 +1,5 @@
 package com.example.NL_MessageBot.service;
-
+import java.util.*;
 import com.example.NL_MessageBot.config.BotConfig;
 import com.vk.api.sdk.exceptions.ApiAuthException;
 import lombok.SneakyThrows;
@@ -22,6 +22,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     Message message = new Message();
     private final BotConfig config;
 
+
     public TelegramBot(BotConfig config) {
         this.config = config;
         List<BotCommand> listofCommands = Arrays.asList(new BotCommand("/get_messages", "send last 4 messages"), new BotCommand("/get_mydata", "send actual id and token"), new BotCommand("/set_id", "allow to set new id"), new BotCommand("set_token", "allow to set new token"));
@@ -31,49 +32,52 @@ public class TelegramBot extends TelegramLongPollingBot {
             throw new RuntimeException(e);
         }
     }
-
-    int scenario = 0;
     long chatId;
-    VKAdapter Adapter = new VKAdapter(220965381, "vk.afasafsfasgsasadfasdfasfasf");
-
     @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
-        if (update.hasMessage() && update.getMessage().hasText() && (scenario == 0)) {
-            String messageText = update.getMessage().getText();
+        if (update.hasMessage() && update.getMessage().hasText()) {
             chatId = update.getMessage().getChatId();
-            switch (messageText) {
-                case "/get_messages":
-                    try {
-                        sendMessage(chatId, VkData.dataReader(Adapter.getActor()));
-                    } catch (ApiAuthException e) {
-                        sendMessage(chatId, "произошла ошибка, пожалуйста введите  новые id и/или токен");
-                    }
-                    break;
-                case "/set_token":
-                    sendMessage(chatId, "Пожалуйста установите новый токен");
-                    scenario = 1;
-                    break;
-                case "/set_id":
-                    sendMessage(chatId, "Пожалуйста установите новый id");
-                    scenario = 2;
-                    break;
-                case "/get_mydata":
-                    sendMessage(chatId, Adapter.getActor().getAccessToken() + "\n" + Adapter.getActor().getId());
-                    break;
-                default:
-                    sendMessage(chatId, "sorry");
+            if(!IdMapper.scenario.containsKey(chatId)){
+                IdMapper.setNewId(chatId);
             }
-        } else if (update.hasMessage() && update.getMessage().hasText() && scenario == 1) {
-            Adapter = new VKAdapter(Adapter.getActor().getId(), update.getMessage().getText());
-            scenario = 0;
-        } else if (update.hasMessage() && update.getMessage().hasText() && scenario == 2) {
-            try {
-                Adapter = new VKAdapter(Integer.parseInt(update.getMessage().getText()), Adapter.getActor().getAccessToken());
-            } catch (NumberFormatException e) {
-                sendMessage(chatId, "Некорректный ввод");
+
+            if (IdMapper.getScenario(chatId)==0) {
+                String messageText = update.getMessage().getText();
+
+                switch (messageText) {
+                    case "/get_messages":
+                        try {
+                            sendMessage(chatId, VkData.dataReader(IdMapper.getActor(chatId)));
+                        } catch (ApiAuthException e) {
+                            sendMessage(chatId, "произошла ошибка, пожалуйста введите  новые id и/или токен");
+                        }
+                        break;
+                    case "/set_token":
+                        sendMessage(chatId, "Пожалуйста установите новый токен");
+                        IdMapper.setNewScenario(chatId,1);
+                        break;
+                    case "/set_id":
+                        sendMessage(chatId, "Пожалуйста установите новый id");
+                        IdMapper.setNewScenario(chatId,2);
+                        break;
+                    case "/get_mydata":
+                        sendMessage(chatId, IdMapper.getToken(chatId) + "\n" + IdMapper.getVkId(chatId));
+                        break;
+                    default:
+                        sendMessage(chatId, "sorry");
+                }
+            } else if (IdMapper.getScenario(chatId)==1) {
+                IdMapper.setNewToken(chatId,update.getMessage().getText());
+                IdMapper.setNewScenario(chatId,0);
+            } else if (IdMapper.getScenario(chatId)==2) {
+                try {
+                    IdMapper.setNewVkId(chatId,Integer.parseInt(update.getMessage().getText()));
+                } catch (NumberFormatException e) {
+                    sendMessage(chatId, "Некорректный ввод");
+                }
+                IdMapper.setNewScenario(chatId,0);
             }
-            scenario = 0;
         }
     }
 
