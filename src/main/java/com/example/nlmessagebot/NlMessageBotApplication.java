@@ -1,4 +1,4 @@
-package com.example.NL_MessageBot;
+package com.example.nlmessagebot;
 
 import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
