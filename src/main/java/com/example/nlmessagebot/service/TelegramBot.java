@@ -1,5 +1,6 @@
 package com.example.nlmessagebot.service;
 
+import java.time.Instant;
 import java.util.*;
 
 import com.example.nlmessagebot.config.BotConfig;
@@ -48,6 +49,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             chatId = update.getMessage().getChatId();
             if (!IdMapper.idToScenario.containsKey(chatId)) {
                 IdMapper.setNewId(chatId);
+
             }
 
             if (IdMapper.getScenario(chatId) == 0) {
@@ -56,7 +58,14 @@ public class TelegramBot extends TelegramLongPollingBot {
                 switch (messageText) {
                     case "/get_messages":
                         try {
-                            sendMessage(chatId, VkData.dataReader(IdMapper.getActor(chatId)));
+                            VkData.dataReader(IdMapper.getActor(chatId));
+                            for(int count=VkData.globalListOfText.size()-1;count>-1;count--){
+                                sendMessage(chatId,"время: "+
+                                        Instant.ofEpochSecond(VkData.globalListOfDate.get(count)) + "\n" +
+                                        VkData.globalListOfName.get(count)+": \n" +
+                                        VkData.globalListOfText.get(count));
+                            }
+                            VkData.dataCleaner();
                         } catch (ApiAuthException e) {
                             sendMessage(chatId, "произошла ошибка, пожалуйста введите  новые id и/или токен");
                         }
