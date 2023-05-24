@@ -31,7 +31,9 @@ public class TelegramBot extends TelegramLongPollingBot {
         List<BotCommand> listofCommands = Arrays.asList(new BotCommand("/get_messages", "send last 4 messages"),
                 new BotCommand("/get_mydata", "send actual id and token"),
                 new BotCommand("/set_id", "allow to set new id"),
-                new BotCommand("set_token", "allow to set new token")
+                new BotCommand("/set_token", "allow to set new token"),
+                new BotCommand("/help", "gives information about setting your data in bot")
+
         );
         try {
             this.execute(new SetMyCommands(listofCommands, new BotCommandScopeDefault(), null));
@@ -80,6 +82,17 @@ public class TelegramBot extends TelegramLongPollingBot {
                         break;
                     case "/get_mydata":
                         sendMessage(chatId, IdMapper.getToken(chatId) + "\n" + IdMapper.getVkId(chatId));
+                        break;
+                    case "/start":
+                        sendMessage(chatId,"Привет! Этот бот позволит вам получить ваши непрочитанные сообщения из vk в telegram." +
+                                "\n" + "Для начала вам нужно сообщить боту свои vk_id и access_token с помощь комманд /set_id и /set_token." +
+                                "\n" + "Если вам непонятно как получить эти данные, возпользуйтесь командой /help" );
+                        break;
+                    case "/help":
+                        sendMessage(chatId,"Для получения vk_id зайдите на свою страницу во вконтакте, откройте свою фотографию и в ссылке на страницу скопируйте цифры находящиеся между =photo и _");
+                        sendMessage(chatId,"Для получения access_token, перейдите по ссылке: https://vkhost.github.io/, " +
+                                "в настройках выберете сообщения и доступ в любое время, после чего нажмите получить, " +
+                                "а затем разрешить и в конце выберете из полученной страницы скопируйте последовательность между access_token= и &expires_in");
                         break;
                     default:
                         sendMessage(chatId, "sorry");

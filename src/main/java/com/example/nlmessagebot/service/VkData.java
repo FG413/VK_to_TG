@@ -64,6 +64,7 @@ public class VkData {
                         stream().
                         map(Message::getFromId).
                         toList();
+
                  globalListOfDate.addAll(vk.messages().
                          getHistory(actor).
                          userId(conId.get(count)).
@@ -74,7 +75,7 @@ public class VkData {
                          map(Message::getDate).toList());
                 for(int count1 = 0; count1 < listOfId.size(); count1++){
                     globalListOfName.add(vk.users().get(actor).userIds(listOfId.get(count).toString()).execute().get(0).getFirstName() +
-                            " " +
+                           " " +
                             vk.users().get(actor).userIds(listOfId.get(count).toString()).execute().get(0).getLastName());
 
                 }
