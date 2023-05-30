@@ -1,7 +1,6 @@
 package com.example.nlmessagebot.service;
 
 import java.time.Instant;
-import java.util.*;
 
 import com.example.nlmessagebot.config.BotConfig;
 import com.vk.api.sdk.exceptions.ApiAuthException;
@@ -42,14 +41,14 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
-    long chatId;
+
 
     @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
-            chatId = update.getMessage().getChatId();
-            if (!IdMapper.idToScenario.containsKey(chatId)) {
+            long chatId = update.getMessage().getChatId();
+            if (!IdMapper.dataFolder.containsKey(chatId)) {
                 IdMapper.setNewId(chatId);
 
             }
@@ -61,11 +60,11 @@ public class TelegramBot extends TelegramLongPollingBot {
                     case "/get_messages":
                         try {
                             VkData.dataReader(IdMapper.getActor(chatId));
-                            for(int count=VkData.globalListOfText.size()-1;count>-1;count--){
+                            for(ListFolder list: VkData.sumOfList){
                                 sendMessage(chatId,"время: "+
-                                        Instant.ofEpochSecond(VkData.globalListOfDate.get(count)) + "\n" +
-                                        VkData.globalListOfName.get(count)+": \n" +
-                                        VkData.globalListOfText.get(count));
+                                        Instant.ofEpochSecond(list.getDate()) + "\n" +
+                                        list.getName()+": \n" +
+                                        list.getText());
                             }
                             VkData.dataCleaner();
                         } catch (ApiAuthException e) {
@@ -84,9 +83,10 @@ public class TelegramBot extends TelegramLongPollingBot {
                         sendMessage(chatId, IdMapper.getToken(chatId) + "\n" + IdMapper.getVkId(chatId));
                         break;
                     case "/start":
-                        sendMessage(chatId,"Привет! Этот бот позволит вам получить ваши непрочитанные сообщения из vk в telegram." +
-                                "\n" + "Для начала вам нужно сообщить боту свои vk_id и access_token с помощь комманд /set_id и /set_token." +
-                                "\n" + "Если вам непонятно как получить эти данные, возпользуйтесь командой /help" );
+                        sendMessage(chatId, """
+                                Привет! Этот бот позволит вам получить ваши непрочитанные сообщения из vk в telegram.
+                                Для начала вам нужно сообщить боту свои vk_id и access_token с помощь комманд /set_id и /set_token.
+                                Если вам непонятно как получить эти данные, возпользуйтесь командой /help""");
                         break;
                     case "/help":
                         sendMessage(chatId,"Для получения vk_id зайдите на свою страницу во вконтакте, откройте свою фотографию и в ссылке на страницу скопируйте цифры находящиеся между =photo и _");

@@ -6,43 +6,35 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class IdMapper {
-
-    public static Map<Long, VKAdapter> idToAdapter = new HashMap<>();
-    public static Map<Long, Integer> idToScenario = new HashMap<>();
-    public static Map<Long, Integer> idToVkId = new HashMap<>();
-
-    public static int getScenario(long id) {
-        return idToScenario.get(id);
-    }
+    public static Map<Long, MapFolder> dataFolder = new HashMap<>();
+    public static int getScenario(long id) {return dataFolder.get(id).getScenario();}
 
     public static int getVkId(long id) {
-        return idToAdapter.get(id).getId();
+        return dataFolder.get(id).getVkId();
     }
 
     public static String getToken(long id) {
-        return idToAdapter.get(id).getActor().getAccessToken();
+        return dataFolder.get(id).getVkAdapter().getActor().getAccessToken();
     }
 
     public static UserActor getActor(long id) {
-        return idToAdapter.get(id).getActor();
+        return dataFolder.get(id).getVkAdapter().getActor();
     }
 
     public static void setNewId(long id) {
-        idToAdapter.put(id, new VKAdapter(0, "vk.q"));
-        idToScenario.put(id, 0);
-        idToVkId.put(id, 0);
+
+        dataFolder.put(id, new MapFolder(0,0,new VKAdapter(0,"vk.q")));
     }
 
     public static void setNewVkId(long id, int vkId) {
-        idToAdapter.put(id, new VKAdapter(vkId, idToAdapter.get(id).getToken()));
-        idToVkId.put(id, vkId);
+        dataFolder.get(id).setVkId(vkId);
     }
 
     public static void setNewScenario(long id, int plan) {
-        idToScenario.put(id, plan);
+        dataFolder.get(id).setScenario(plan);
     }
 
     public static void setNewToken(long id, String token) {
-        idToAdapter.put(id, new VKAdapter(idToVkId.get(id), token));
+        dataFolder.get(id).setVkAdapter(new VKAdapter(dataFolder.get(id).getVkId(),token));
     }
 }

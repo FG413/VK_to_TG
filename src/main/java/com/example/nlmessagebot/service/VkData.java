@@ -1,9 +1,7 @@
 package com.example.nlmessagebot.service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.vk.api.sdk.client.VkApiClient;
 import com.vk.api.sdk.client.actors.UserActor;
@@ -15,7 +13,7 @@ import com.vk.api.sdk.objects.messages.*;
 
 public class VkData {
     final public static VkApiClient vk = new VkApiClient(new HttpTransportClient());
-
+    public static List<ListFolder> sumOfList = new ArrayList<>();
     public static List<String> globalListOfText= new ArrayList<>();
     public static List<String> globalListOfName = new ArrayList<>();
 
@@ -81,10 +79,15 @@ public class VkData {
                 }
             }
         }
+        for(int count=0; count<globalListOfDate.size(); count++){
 
+            sumOfList.add( new ListFolder(globalListOfText.get(count), globalListOfName.get(count), globalListOfDate.get(count)));
+        }
     }
     public static void dataCleaner(){
         globalListOfName.clear();
         globalListOfText.clear();
+        globalListOfDate.clear();
+        sumOfList.clear();
     }
 }
