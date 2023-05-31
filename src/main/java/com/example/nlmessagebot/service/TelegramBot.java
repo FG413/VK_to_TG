@@ -5,6 +5,7 @@ import java.time.Instant;
 import com.example.nlmessagebot.config.BotConfig;
 import com.vk.api.sdk.exceptions.ApiAuthException;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
@@ -18,7 +19,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.lang.String;
 import java.util.Arrays;
 import java.util.List;
-
+@Slf4j
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
     Message message = new Message();
@@ -37,7 +38,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         try {
             this.execute(new SetMyCommands(listofCommands, new BotCommandScopeDefault(), null));
         } catch (TelegramApiException e) {
-            throw new RuntimeException(e);
+            log.error("Error occured:" + e.getMessage());
         }
     }
 
@@ -69,6 +70,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                             VkData.dataCleaner();
                         } catch (ApiAuthException e) {
                             sendMessage(chatId, "произошла ошибка, пожалуйста введите  новые id и/или токен");
+                            log.error("Error occured:" + e.getMessage());
                         }
                         break;
                     case "/set_token":
@@ -127,7 +129,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         try {
             execute(message);
         } catch (TelegramApiException e) {
-            throw new RuntimeException(e);
+            log.error("Error occured:" + e.getMessage());
         }
     }
 }
