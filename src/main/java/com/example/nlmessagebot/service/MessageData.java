@@ -1,11 +1,11 @@
 package com.example.nlmessagebot.service;
 
-public class ListFolder {
+public class MessageData {
     private String text;
     private int date;
     private String name;
 
-    public ListFolder(String text, String name, int date){
+    public MessageData(String text, String name, int date){
         this.text=text;
         this.name=name;
         this.date=date;

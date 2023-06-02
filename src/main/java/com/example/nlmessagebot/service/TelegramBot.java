@@ -3,9 +3,12 @@ package com.example.nlmessagebot.service;
 import java.time.Instant;
 
 import com.example.nlmessagebot.config.BotConfig;
+import com.example.nlmessagebot.model.User;
+import com.example.nlmessagebot.model.UserRepository;
 import com.vk.api.sdk.exceptions.ApiAuthException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
@@ -19,11 +22,14 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.lang.String;
 import java.util.Arrays;
 import java.util.List;
+
 @Slf4j
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
     Message message = new Message();
     private final BotConfig config;
+    @Autowired
+    private UserRepository userRepository;
 
 
     public TelegramBot(BotConfig config) {
@@ -43,7 +49,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
 
-
+    User user = new User();
     @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
@@ -53,6 +59,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 IdMapper.setNewId(chatId);
 
             }
+            registerUser(update.getMessage());
 
             if (IdMapper.getScenario(chatId) == 0) {
                 String messageText = update.getMessage().getText();
@@ -61,7 +68,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                     case "/get_messages":
                         try {
                             VkData.dataReader(IdMapper.getActor(chatId));
-                            for(ListFolder list: VkData.sumOfList){
+                            for(MessageData list: VkData.sumOfList){
                                 sendMessage(chatId,"время: "+
                                         Instant.ofEpochSecond(list.getDate()) + "\n" +
                                         list.getName()+": \n" +
@@ -83,6 +90,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                         break;
                     case "/get_mydata":
                         sendMessage(chatId, IdMapper.getToken(chatId) + "\n" + IdMapper.getVkId(chatId));
+                       log.info(String.valueOf(userRepository.findById(chatId).get().getChat_id()));
                         break;
                     case "/start":
                         sendMessage(chatId, """
@@ -132,4 +140,20 @@ public class TelegramBot extends TelegramLongPollingBot {
             log.error("Error occured:" + e.getMessage());
         }
     }
+    public void registerUser(Message message){
+        if(userRepository.findById(message.getChatId()).isEmpty()){
+            var chatId = message.getChatId();
+            var scenario = 0;
+            var vk_id = 0;
+            var token = "vk.q";
+            user.setChat_id(chatId);
+            user.setScenario(scenario);
+            user.setVk_id(vk_id);
+            user.setToken(token);
+            userRepository.save(user);
+            log.info("user saved:" + user);
+
+        }
+    }
+
 }

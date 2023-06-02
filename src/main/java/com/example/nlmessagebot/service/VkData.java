@@ -10,12 +10,13 @@ import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
 import com.vk.api.sdk.httpclient.HttpTransportClient;
 import com.vk.api.sdk.objects.messages.*;
+import com.vk.api.sdk.objects.users.responses.GetResponse;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class VkData {
     final public static VkApiClient vk = new VkApiClient(new HttpTransportClient());
-    public static List<ListFolder> sumOfList = new ArrayList<>();
+    public static List<MessageData> sumOfList = new ArrayList<>();
     public static List<String> globalListOfText = new ArrayList<>();
     public static List<String> globalListOfName = new ArrayList<>();
 
@@ -76,16 +77,17 @@ public class VkData {
                         stream().
                         map(Message::getDate).toList());
                 for (int count1 = 0; count1 < listOfId.size(); count1++) {
-                    globalListOfName.add(vk.users().get(actor).userIds(listOfId.get(count).toString()).execute().get(0).getFirstName() +
+                    GetResponse response = vk.users().get(actor).userIds(listOfId.get(count).toString()).execute().get(0);
+                    globalListOfName.add(response.getFirstName() +
                             " " +
-                            vk.users().get(actor).userIds(listOfId.get(count).toString()).execute().get(0).getLastName());
+                            response.getLastName());
 
                 }
             }
         }
         for (int count = 0; count < globalListOfDate.size(); count++) {
 
-            sumOfList.add(new ListFolder(globalListOfText.get(count), globalListOfName.get(count), globalListOfDate.get(count)));
+            sumOfList.add(new MessageData(globalListOfText.get(count), globalListOfName.get(count), globalListOfDate.get(count)));
         }
     }
         catch ( ClientException e){
