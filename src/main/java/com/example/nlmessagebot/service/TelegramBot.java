@@ -83,10 +83,13 @@ public class TelegramBot extends TelegramLongPollingBot {
                     case "/set_token":
                         sendMessage(chatId, "Пожалуйста установите новый токен");
                         IdMapper.setNewScenario(chatId, 1);
+
                         break;
                     case "/set_id":
                         sendMessage(chatId, "Пожалуйста установите новый id");
                         IdMapper.setNewScenario(chatId, 2);
+
+
                         break;
                     case "/get_mydata":
                         sendMessage(chatId, IdMapper.getToken(chatId) + "\n" + IdMapper.getVkId(chatId));
@@ -113,6 +116,11 @@ public class TelegramBot extends TelegramLongPollingBot {
             } else if (IdMapper.getScenario(chatId) == 2) {
                 try {
                     IdMapper.setNewVkId(chatId, Integer.parseInt(update.getMessage().getText()));
+                    User localUser= new User();
+                    localUser.setChat_id(chatId);
+                    localUser.setVk_id(Integer.parseInt(update.getMessage().getText()));
+                    userRepository.save(localUser);
+                    log.info("user saved:" + localUser);
                 } catch (NumberFormatException e) {
                     sendMessage(chatId, "Некорректный ввод");
                 }
