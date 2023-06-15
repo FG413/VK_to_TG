@@ -2,6 +2,7 @@ package com.example.nlmessagebot.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.vk.api.sdk.client.VkApiClient;
 import com.vk.api.sdk.client.actors.UserActor;
@@ -29,6 +30,7 @@ public class VkData {
                 map(Conversation::getPeer).
                 map(ConversationPeer::getId).
                 toList();
+
         List<Integer> ConUnread = vk.messages().
                 getConversations(actor).
                 execute().
@@ -41,6 +43,7 @@ public class VkData {
 
         for (int count = 0; count < 20; count++) {
             if (ConUnread.get(count) != null) {
+
                 vk.messages().
                         getHistory(actor).
                         userId(conId.get(count)).
@@ -50,15 +53,17 @@ public class VkData {
                         stream().
                         map(Message -> {
                             try {
+                                log.info("ping");
                                 return sumOfList.add(new MessageData(Message.getText(),
                                         vk.users().get(actor).userIds(Message.getFromId().toString()).execute().get(0).getFirstName() + " " +
                                                 vk.users().get(actor).userIds(Message.getFromId().toString()).execute().get(0).getFirstName(),
                                         Message.getDate()));
+
                             } catch (ApiException | ClientException e) {
                                 log.error("Error occured:" + e.getMessage());
                             }
                             return null;
-                        });
+                        }).collect(Collectors.toList());
 
 
 
