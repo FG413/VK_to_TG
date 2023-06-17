@@ -56,10 +56,6 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         if (update.hasMessage() && update.getMessage().hasText()) {
             long chatId = update.getMessage().getChatId();
-            if (!IdMapper.dataFolder.containsKey(chatId)) {
-                IdMapper.setNewId(chatId);
-
-            }
             registerUser(update.getMessage());
 
             if (userRepository.findById(chatId).get().getScenario() == 0) {
@@ -87,14 +83,12 @@ public class TelegramBot extends TelegramLongPollingBot {
                     case "/set_token" -> {
                         sendMessage(chatId, "Пожалуйста установите новый токен");
                         localUser=userRepository.findById(chatId).get();
-                        localUser.setChat_id(chatId);
                         localUser.setScenario(1);
                         userRepository.save(localUser);
                     }
                     case "/set_id" -> {
                         sendMessage(chatId, "Пожалуйста установите новый id");
                         localUser=userRepository.findById(chatId).get();
-                        localUser.setChat_id(chatId);
                         localUser.setScenario(2);
                         userRepository.save(localUser);
                     }
@@ -117,7 +111,6 @@ public class TelegramBot extends TelegramLongPollingBot {
             }
             else if (userRepository.findById(chatId).get().getScenario() == 1) {
                 localUser=userRepository.findById(chatId).get();
-                localUser.setChat_id(chatId);
                 localUser.setToken(update.getMessage().getText());
                 localUser.setScenario(0);
                 userRepository.save(localUser);
@@ -126,7 +119,6 @@ public class TelegramBot extends TelegramLongPollingBot {
                 localUser=userRepository.findById(chatId).get();
                 try {
 
-                    localUser.setChat_id(chatId);
                     localUser.setVk_id(Integer.parseInt(update.getMessage().getText()));
 
                     log.info("user saved:" + localUser);
@@ -134,7 +126,6 @@ public class TelegramBot extends TelegramLongPollingBot {
                     sendMessage(chatId, "Некорректный ввод");
                 }
 
-                localUser.setChat_id(chatId);
                 localUser.setScenario(0);
                 userRepository.save(localUser);
             }
