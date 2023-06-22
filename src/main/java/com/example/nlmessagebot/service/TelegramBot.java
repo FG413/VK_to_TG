@@ -31,7 +31,6 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Autowired
     private UserRepository userRepository;
 
-
     public TelegramBot(BotConfig config) {
         this.config = config;
         List<BotCommand> listofCommands = Arrays.asList(new BotCommand("/get_messages", "send last 4 messages"),
@@ -39,7 +38,6 @@ public class TelegramBot extends TelegramLongPollingBot {
                 new BotCommand("/set_id", "allow to set new id"),
                 new BotCommand("/set_token", "allow to set new token"),
                 new BotCommand("/help", "gives information about setting your data in bot")
-
         );
         try {
             this.execute(new SetMyCommands(listofCommands, new BotCommandScopeDefault(), null));
@@ -48,19 +46,17 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
-    private User localUser = new User();
-    private User user = new User();
+    private final User user = new User();
+
     @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
-
         if (update.hasMessage() && update.getMessage().hasText()) {
             long chatId = update.getMessage().getChatId();
             registerUser(update.getMessage());
-
+            User localUser = new User();
             if (userRepository.findById(chatId).get().getScenario() == 0) {
                 String messageText = update.getMessage().getText();
-
                 switch (messageText) {
                     case "/get_messages" -> {
                         try {
@@ -71,7 +67,6 @@ public class TelegramBot extends TelegramLongPollingBot {
                                         Instant.ofEpochSecond(list.getDate()) + "\n" +
                                         list.getName() + ": \n" +
                                         list.getText());
-
                             }
                             log.info(VkData.sumOfList.toString());
                             VkData.dataCleaner();
@@ -82,13 +77,13 @@ public class TelegramBot extends TelegramLongPollingBot {
                     }
                     case "/set_token" -> {
                         sendMessage(chatId, "Пожалуйста установите новый токен");
-                        localUser=userRepository.findById(chatId).get();
+                        localUser = userRepository.findById(chatId).get();
                         localUser.setScenario(1);
                         userRepository.save(localUser);
                     }
                     case "/set_id" -> {
                         sendMessage(chatId, "Пожалуйста установите новый id");
-                        localUser=userRepository.findById(chatId).get();
+                        localUser = userRepository.findById(chatId).get();
                         localUser.setScenario(2);
                         userRepository.save(localUser);
                     }
@@ -108,15 +103,13 @@ public class TelegramBot extends TelegramLongPollingBot {
                     }
                     default -> sendMessage(chatId, "sorry");
                 }
-            }
-            else if (userRepository.findById(chatId).get().getScenario() == 1) {
-                localUser=userRepository.findById(chatId).get();
+            } else if (userRepository.findById(chatId).get().getScenario() == 1) {
+                localUser = userRepository.findById(chatId).get();
                 localUser.setToken(update.getMessage().getText());
                 localUser.setScenario(0);
                 userRepository.save(localUser);
-            }
-            else if (userRepository.findById(chatId).get().getScenario() == 2) {
-                localUser=userRepository.findById(chatId).get();
+            } else if (userRepository.findById(chatId).get().getScenario() == 2) {
+                localUser = userRepository.findById(chatId).get();
                 try {
 
                     localUser.setVk_id(Integer.parseInt(update.getMessage().getText()));
@@ -151,8 +144,9 @@ public class TelegramBot extends TelegramLongPollingBot {
             log.error("Error occured:" + e.getMessage());
         }
     }
-    public void registerUser(Message message){
-        if(userRepository.findById(message.getChatId()).isEmpty()){
+
+    public void registerUser(Message message) {
+        if (userRepository.findById(message.getChatId()).isEmpty()) {
             var chatId = message.getChatId();
             var scenario = 0;
             var vk_id = 0;

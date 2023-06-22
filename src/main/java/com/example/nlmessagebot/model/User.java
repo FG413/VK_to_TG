@@ -3,7 +3,7 @@ package com.example.nlmessagebot.model;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
-@Entity(name="newmap_table")
+@Entity(name = "newmap_table")
 public class User {
     @Id
     private Long chat_id;
