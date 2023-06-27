@@ -1,8 +1,8 @@
-package com.example.nlmessagebot.service;
+package com.example.nlmessagebot.data;
 
 import com.vk.api.sdk.client.actors.UserActor;
 
-public class VKAdapter {
+public class VkUserData {
 
     public UserActor getActor() {
         return actor;
@@ -23,7 +23,7 @@ public class VKAdapter {
 
     private final String token;
 
-    public VKAdapter(int id, String token) {
+    public VkUserData(int id, String token) {
         actor = new UserActor(id, token);
         this.id = id;
         this.token = token;

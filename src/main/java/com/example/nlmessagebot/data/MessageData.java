@@ -1,4 +1,4 @@
-package com.example.nlmessagebot.service;
+package com.example.nlmessagebot.data;
 
 public class MessageData {
     private final String text;
