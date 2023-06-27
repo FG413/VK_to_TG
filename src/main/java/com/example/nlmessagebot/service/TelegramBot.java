@@ -3,10 +3,9 @@ package com.example.nlmessagebot.service;
 import java.time.Instant;
 
 import com.example.nlmessagebot.config.BotConfig;
-import com.example.nlmessagebot.data.MessageData;
-import com.example.nlmessagebot.data.VkUserData;
 import com.example.nlmessagebot.model.User;
 import com.example.nlmessagebot.model.UserRepository;
+import com.vk.api.sdk.client.actors.UserActor;
 import com.vk.api.sdk.exceptions.ApiAuthException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +27,7 @@ import java.util.List;
 @Slf4j
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
-    Message message = new Message();
+
     private final BotConfig config;
     @Autowired
     private UserRepository userRepository;
@@ -62,8 +61,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                 switch (messageText) {
                     case "/get_messages" -> {
                         try {
-                            VkUserData vkUserData = new VkUserData(userRepository.findById(chatId).get().getVk_id(), userRepository.findById(chatId).get().getToken());
-                            VkDataCollector.dataReader(vkUserData.getActor());
+                            UserActor actor = new UserActor(userRepository.findById(chatId).get().getVk_id(), userRepository.findById(chatId).get().getToken());
+                            VkDataCollector.dataReader(actor);
                             for (MessageData list : VkDataCollector.sumOfList) {
                                 sendMessage(chatId, "время: " +
                                         Instant.ofEpochSecond(list.getDate()) + "\n" +
