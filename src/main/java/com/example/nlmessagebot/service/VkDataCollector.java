@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.example.nlmessagebot.data.MessageData;
 import com.vk.api.sdk.client.VkApiClient;
 import com.vk.api.sdk.client.actors.UserActor;
 
@@ -11,11 +12,10 @@ import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
 import com.vk.api.sdk.httpclient.HttpTransportClient;
 import com.vk.api.sdk.objects.messages.*;
-import com.vk.api.sdk.objects.users.responses.GetResponse;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class VkData {
+public class VkDataCollector {
     final public static VkApiClient vk = new VkApiClient(new HttpTransportClient());
     public static List<MessageData> sumOfList = new ArrayList<>();
 
@@ -53,7 +53,7 @@ public class VkData {
                             stream().
                             map(Message -> {
                                 try {
-                                    log.info("ping");
+
                                     return sumOfList.add(new MessageData(Message.getText(),
                                             vk.users().get(actor).userIds(Message.getFromId().toString()).execute().get(0).getFirstName() + " " +
                                                     vk.users().get(actor).userIds(Message.getFromId().toString()).execute().get(0).getFirstName(),

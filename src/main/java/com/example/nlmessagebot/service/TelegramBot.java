@@ -3,6 +3,8 @@ package com.example.nlmessagebot.service;
 import java.time.Instant;
 
 import com.example.nlmessagebot.config.BotConfig;
+import com.example.nlmessagebot.data.MessageData;
+import com.example.nlmessagebot.data.VkUserData;
 import com.example.nlmessagebot.model.User;
 import com.example.nlmessagebot.model.UserRepository;
 import com.vk.api.sdk.exceptions.ApiAuthException;
@@ -60,16 +62,16 @@ public class TelegramBot extends TelegramLongPollingBot {
                 switch (messageText) {
                     case "/get_messages" -> {
                         try {
-                            VKAdapter vkAdapter = new VKAdapter(userRepository.findById(chatId).get().getVk_id(), userRepository.findById(chatId).get().getToken());
-                            VkData.dataReader(vkAdapter.getActor());
-                            for (MessageData list : VkData.sumOfList) {
+                            VkUserData vkUserData = new VkUserData(userRepository.findById(chatId).get().getVk_id(), userRepository.findById(chatId).get().getToken());
+                            VkDataCollector.dataReader(vkUserData.getActor());
+                            for (MessageData list : VkDataCollector.sumOfList) {
                                 sendMessage(chatId, "время: " +
                                         Instant.ofEpochSecond(list.getDate()) + "\n" +
                                         list.getName() + ": \n" +
                                         list.getText());
                             }
-                            log.info(VkData.sumOfList.toString());
-                            VkData.dataCleaner();
+                            log.info(VkDataCollector.sumOfList.toString());
+                            VkDataCollector.dataCleaner();
                         } catch (ApiAuthException e) {
                             sendMessage(chatId, "произошла ошибка, пожалуйста введите  новые id и/или токен");
                             log.error("Error occured:" + e.getMessage());
