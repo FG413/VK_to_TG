@@ -2,6 +2,7 @@ package com.example.nlmessagebot.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.vk.api.sdk.client.VkApiClient;
@@ -11,70 +12,55 @@ import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
 import com.vk.api.sdk.httpclient.HttpTransportClient;
 import com.vk.api.sdk.objects.messages.*;
+import com.vk.api.sdk.objects.users.UserMin;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class VkDataCollector {
-    final public static VkApiClient vk = new VkApiClient(new HttpTransportClient());
+    public final static VkApiClient vk = new VkApiClient(new HttpTransportClient());
     public static List<MessageData> sumOfList = new ArrayList<>();
 
-    public static void dataReader(UserActor actor) throws ApiException {
-        try {
-            List<Integer> conId = vk.messages().
-                    getConversations(actor).
-                    execute().
-                    getItems().
-                    stream().
-                    map(ConversationWithMessage::getConversation).
-                    map(Conversation::getPeer).
-                    map(ConversationPeer::getId).
-                    toList();
+    public static List<MessageData> getUnreadMessages(UserActor actor) throws ApiException, ClientException {
+        List<Conversation> conversations = vk.messages()
+                .getConversations(actor)
+                .execute()
+                .getItems()
+                .stream()
+                .map(ConversationWithMessage::getConversation).toList();
 
-            List<Integer> ConUnread = vk.messages().
-                    getConversations(actor).
-                    execute().
-                    getItems().
-                    stream().
-                    map(ConversationWithMessage::getConversation).
-                    map(Conversation::getUnreadCount).
-                    toList();
+        Map<Integer, Integer> conversationToUnreadMessages = conversations.stream()
+                .collect(Collectors.toMap(c -> c.getPeer().getId(), Conversation::getUnreadCount));
 
+        List<MessageData> unreadMessages = new ArrayList<>();
 
-            for (int count = 0; count < 20; count++) {
-                if (ConUnread.get(count) != null) {
-
-                    vk.messages().
-                            getHistory(actor).
-                            userId(conId.get(count)).
-                            count(ConUnread.get(count)).
-                            execute().
-                            getItems().
-                            stream().
-                            map(Message -> {
-                                try {
-
-                                    return sumOfList.add(new MessageData(Message.getText(),
-                                            vk.users().get(actor).userIds(Message.getFromId().toString()).execute().get(0).getFirstName() + " " +
-                                                    vk.users().get(actor).userIds(Message.getFromId().toString()).execute().get(0).getFirstName(),
-                                            Message.getDate()));
-
-                                } catch (ApiException | ClientException e) {
-                                    log.error("Error occured:" + e.getMessage());
-                                }
-                                return null;
-                            }).collect(Collectors.toList());
-
-
-                }
+        for (Map.Entry<Integer, Integer> conversationToUnreadMessagesCount : conversationToUnreadMessages.entrySet()) {
+            if (conversationToUnreadMessagesCount.getValue() == 0) {
+                continue;
             }
 
-        } catch (ClientException e) {
-            log.error("Error occured:" + e.getMessage());
+            List<Message> messages = vk.messages().getHistory(actor)
+                    .userId(conversationToUnreadMessagesCount.getKey())
+                    .count(conversationToUnreadMessagesCount.getValue())
+                    .execute()
+                    .getItems();
+
+            List<String> messageSendersIds = messages.stream()
+                    .map(m -> m.getFromId().toString())
+                    .distinct().toList();
+
+            Map<Integer, String> senderIdToName = vk.users()
+                    .get(actor)
+                    .userIds(messageSendersIds)
+                    .execute()
+                    .stream()
+                    .collect(Collectors.toMap(UserMin::getId, u -> u.getFirstName() + " " + u.getLastName()));
+
+            unreadMessages.addAll(
+                    messages.stream()
+                            .map(m -> new MessageData(m.getText(), senderIdToName.get(m.getFromId()), m.getDate()))
+                            .toList()
+            );
         }
-    }
-
-    public static void dataCleaner() {
-
-        sumOfList.clear();
+        return unreadMessages;
     }
 }
