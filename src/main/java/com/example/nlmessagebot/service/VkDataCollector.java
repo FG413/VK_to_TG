@@ -27,14 +27,11 @@ public class VkDataCollector {
                 .map(ConversationWithMessage::getConversation).toList();
 
         Map<Integer, Integer> conversationToUnreadMessages = new HashMap<>();
-        conversations
-                .forEach(
-                        c -> conversationToUnreadMessages.put(c.getPeer().getId(),Optional.ofNullable(c.getUnreadCount()).orElse(0))
-                );
+        conversations.stream().map(c -> conversationToUnreadMessages.put(c.getPeer().getId(),c.getUnreadCount())).collect(Collectors.toList());
         List<MessageData> unreadMessages = new ArrayList<>();
 
         for (Map.Entry<Integer, Integer> conversationToUnreadMessagesCount : conversationToUnreadMessages.entrySet()) {
-            if (conversationToUnreadMessagesCount.getValue() == 0) {
+            if (conversationToUnreadMessagesCount.getValue() == null) {
                 continue;
             }
 
