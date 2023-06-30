@@ -65,7 +65,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                     try {
                         UserActor actor = new UserActor(userRepository.findById(chatId).get().getVkId(), userRepository.findById(chatId).get().getToken());
                         List<MessageData> unreadMessages = VkDataCollector.getUnreadMessages(actor);
-                        for (MessageData list : VkDataCollector.sumOfList) {
+                        for (MessageData list : unreadMessages) {
                             sendMessage(chatId, "время: " +
                                     Instant.ofEpochSecond(list.getDate()) + "\n" +
                                     list.getName() + ": \n" +

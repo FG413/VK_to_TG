@@ -1,8 +1,6 @@
 package com.example.nlmessagebot.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.vk.api.sdk.client.VkApiClient;
@@ -28,9 +26,11 @@ public class VkDataCollector {
                 .stream()
                 .map(ConversationWithMessage::getConversation).toList();
 
-        Map<Integer, Integer> conversationToUnreadMessages = conversations.stream()
-                .collect(Collectors.toMap(c -> c.getPeer().getId(), Conversation::getUnreadCount));
-
+        Map<Integer, Integer> conversationToUnreadMessages = new HashMap<>();
+        conversations
+                .forEach(
+                        c -> conversationToUnreadMessages.put(c.getPeer().getId(),Optional.ofNullable(c.getUnreadCount()).orElse(0))
+                );
         List<MessageData> unreadMessages = new ArrayList<>();
 
         for (Map.Entry<Integer, Integer> conversationToUnreadMessagesCount : conversationToUnreadMessages.entrySet()) {
