@@ -1,5 +1,6 @@
 package com.example.nlmessagebot.service;
 
+import java.io.IOException;
 import java.time.Instant;
 
 import com.example.nlmessagebot.config.BotConfig;
@@ -31,14 +32,19 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Autowired
     private UserRepository userRepository;
 
-    public TelegramBot(BotConfig config) {
+
+
+
+
+
+    public TelegramBot(BotConfig config) throws IOException {
         this.config = config;
         List<BotCommand> commands = List.of(
-                new BotCommand("/get_messages", "send last 4 messages"),
-                new BotCommand("/get_mydata", "send actual id and token"),
-                new BotCommand("/set_id", "allow to set new id"),
-                new BotCommand("/set_token", "allow to set new token"),
-                new BotCommand("/help", "gives information about setting your data in bot")
+                new BotCommand("/get_messages", "get last 4 unread messages"),
+                new BotCommand("/get_mydata", "get actual id and token"),
+                new BotCommand("/set_id", "set new id"),
+                new BotCommand("/set_token", "set new token"),
+                new BotCommand("/help", "get information about how bot works")
         );
         try {
             execute(new SetMyCommands(commands, new BotCommandScopeDefault(), null));
@@ -98,6 +104,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                         Для начала вам нужно сообщить боту свои vk_id и access_token с помощь комманд /set_id и /set_token.
                         Если вам непонятно как получить эти данные, возпользуйтесь командой /help""");
                 case "/help" -> {
+                    sendMessage(chatId, "Для начала работы бота вам нужно");
                     sendMessage(chatId, "Для получения vk_id зайдите на свою страницу во вконтакте, откройте свою фотографию и в ссылке на страницу скопируйте цифры находящиеся между =photo и _");
                     sendMessage(chatId, "Для получения access_token, перейдите по ссылке: https://vkhost.github.io/, " +
                             "в настройках выберете сообщения и доступ в любое время, после чего нажмите получить, " +
@@ -137,6 +144,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
         message.setText(textToSend);
+
         try {
             execute(message);
         } catch (TelegramApiException e) {
