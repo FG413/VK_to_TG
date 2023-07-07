@@ -126,9 +126,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
-    public String getBotToken() {
-        return config.getToken();
-    }
+    public String getBotToken() {return config.getToken();}
 
     @Override
     public String getBotUsername() {
