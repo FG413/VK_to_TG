@@ -1,10 +1,8 @@
 package com.example.nlmessagebot.service;
 
-import com.vk.api.sdk.objects.photos.Photo;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.util.List;
 
 @Getter
 @RequiredArgsConstructor
