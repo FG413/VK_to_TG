@@ -5,7 +5,7 @@ import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
 
-@Entity(name = "user_info") // change name, user_info, userr
+@Entity(name = "user_info")
 @Getter
 @Setter
 public class User {

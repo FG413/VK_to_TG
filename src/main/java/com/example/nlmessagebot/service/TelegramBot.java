@@ -1,6 +1,9 @@
 package com.example.nlmessagebot.service;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
 import java.time.Instant;
 
 import com.example.nlmessagebot.config.BotConfig;
@@ -8,13 +11,18 @@ import com.example.nlmessagebot.model.User;
 import com.example.nlmessagebot.repository.UserRepository;
 import com.vk.api.sdk.client.actors.UserActor;
 import com.vk.api.sdk.exceptions.ApiAuthException;
+import com.vk.api.sdk.objects.photos.Photo;
+import com.vk.api.sdk.objects.photos.PhotoSizes;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.asynchttpclient.uri.Uri;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
@@ -31,6 +39,8 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final BotConfig config;
     @Autowired
     private UserRepository userRepository;
+    File file = new File("./dog.jpg");
+
 
 
 
@@ -76,8 +86,9 @@ public class TelegramBot extends TelegramLongPollingBot {
                                     Instant.ofEpochSecond(list.getDate()) + "\n" +
                                     list.getName() + ": \n" +
                                     list.getText());
+
                         }
-                        log.info(VkDataCollector.sumOfList.toString());
+
                     } catch (ApiAuthException e) {
                         sendMessage(chatId, "произошла ошибка, пожалуйста введите  новые id и/или токен");
                         log.error("Error occured:" + e.getMessage());
@@ -104,6 +115,9 @@ public class TelegramBot extends TelegramLongPollingBot {
                         Для начала вам нужно сообщить боту свои vk_id и access_token с помощь комманд /set_id и /set_token.
                         Если вам непонятно как получить эти данные, возпользуйтесь командой /help""");
                 case "/help" -> {
+                    InputFile inputFile = new InputFile(file);
+                    SendPhoto photo = new SendPhoto(String.valueOf(chatId),inputFile);
+                    execute(photo);
                     sendMessage(chatId, "Для начала работы бота вам нужно");
                     sendMessage(chatId, "Для получения vk_id зайдите на свою страницу во вконтакте, откройте свою фотографию и в ссылке на страницу скопируйте цифры находящиеся между =photo и _");
                     sendMessage(chatId, "Для получения access_token, перейдите по ссылке: https://vkhost.github.io/, " +
@@ -152,6 +166,20 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
+    public void sendPhoto(long chatId, URI uri) {
+        File forInput= new File(uri);
+        InputFile inputFile = new InputFile(forInput);
+
+        SendPhoto photo =new SendPhoto();
+        photo.setChatId(String.valueOf(chatId));
+        photo.setPhoto(inputFile);
+
+        try {
+            execute(photo);
+        } catch (TelegramApiException e) {
+            log.error("Error occured:" + e.getMessage());
+        }
+    }
     public void registerUser(Message message) {
         if (userRepository.findById(message.getChatId()).isEmpty()) {
             var chatId = message.getChatId();
