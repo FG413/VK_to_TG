@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class VkDataCollector {
     public final static VkApiClient vk = new VkApiClient(new HttpTransportClient());
-    public static List<MessageData> sumOfList = new ArrayList<>();
+
 
     public static List<MessageData> getUnreadMessages(UserActor actor) throws ApiException, ClientException {
         List<Conversation> conversations = vk.messages()
@@ -29,7 +29,6 @@ public class VkDataCollector {
         Map<Integer, Integer> conversationToUnreadMessages = new HashMap<>();
         conversations.stream().map(c -> conversationToUnreadMessages.put(c.getPeer().getId(),c.getUnreadCount())).collect(Collectors.toList());
         List<MessageData> unreadMessages = new ArrayList<>();
-
         for (Map.Entry<Integer, Integer> conversationToUnreadMessagesCount : conversationToUnreadMessages.entrySet()) {
             if (conversationToUnreadMessagesCount.getValue() == null) {
                 continue;

@@ -1,7 +1,9 @@
 package com.example.nlmessagebot.service;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
 import java.time.Instant;
-
 import com.example.nlmessagebot.config.BotConfig;
 import com.example.nlmessagebot.model.User;
 import com.example.nlmessagebot.repository.UserRepository;
@@ -14,6 +16,8 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
@@ -30,15 +34,22 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final BotConfig config;
     @Autowired
     private UserRepository userRepository;
+    File file = new File("./dog.jpg");
 
-    public TelegramBot(BotConfig config) {
+
+
+
+
+
+
+    public TelegramBot(BotConfig config) throws IOException {
         this.config = config;
         List<BotCommand> commands = List.of(
-                new BotCommand("/get_messages", "send last 4 messages"),
-                new BotCommand("/get_mydata", "send actual id and token"),
-                new BotCommand("/set_id", "allow to set new id"),
-                new BotCommand("/set_token", "allow to set new token"),
-                new BotCommand("/help", "gives information about setting your data in bot")
+                new BotCommand("/get_messages", "get last 4 unread messages"),
+                new BotCommand("/get_mydata", "get actual id and token"),
+                new BotCommand("/set_id", "set new id"),
+                new BotCommand("/set_token", "set new token"),
+                new BotCommand("/help", "get information about how bot works")
         );
         try {
             execute(new SetMyCommands(commands, new BotCommandScopeDefault(), null));
@@ -70,8 +81,9 @@ public class TelegramBot extends TelegramLongPollingBot {
                                     Instant.ofEpochSecond(list.getDate()) + "\n" +
                                     list.getName() + ": \n" +
                                     list.getText());
+
                         }
-                        log.info(VkDataCollector.sumOfList.toString());
+
                     } catch (ApiAuthException e) {
                         sendMessage(chatId, "произошла ошибка, пожалуйста введите  новые id и/или токен");
                         log.error("Error occured:" + e.getMessage());
@@ -90,7 +102,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                     userRepository.save(localUser);
                 }
                 case "/get_mydata" -> {
-                    sendMessage(chatId, userRepository.findById(chatId).get().getToken() + "\n" + userRepository.findById(chatId).get().getVkId());
+                    sendMessage(chatId, userRepository.findById(chatId).get().getToken() + "\n" +
+                            userRepository.findById(chatId).get().getVkId());
                     log.info(String.valueOf(userRepository.findById(chatId).get().getChatId()));
                 }
                 case "/start" -> sendMessage(chatId, """
@@ -98,10 +111,18 @@ public class TelegramBot extends TelegramLongPollingBot {
                         Для начала вам нужно сообщить боту свои vk_id и access_token с помощь комманд /set_id и /set_token.
                         Если вам непонятно как получить эти данные, возпользуйтесь командой /help""");
                 case "/help" -> {
-                    sendMessage(chatId, "Для получения vk_id зайдите на свою страницу во вконтакте, откройте свою фотографию и в ссылке на страницу скопируйте цифры находящиеся между =photo и _");
-                    sendMessage(chatId, "Для получения access_token, перейдите по ссылке: https://vkhost.github.io/, " +
-                            "в настройках выберете сообщения и доступ в любое время, после чего нажмите получить, " +
-                            "а затем разрешить и в конце выберете из полученной страницы скопируйте последовательность между access_token= и &expires_in");
+                    sendMessage(chatId, "Для начала работы бота вам нужно установить свой vk_id и access_token с помощь комманд /set_id и /set_token ");
+                    sendMessage(chatId, "1.Для получения vk_id зайдите на свою страницу во вконтакте" + "\n" + "2.Откройте свою фотографию");
+                    sendPhoto(chatId,"./pic1.png");
+                    sendMessage(chatId,"3.В ссылке на страницу скопируйте цифры находящиеся между =photo и _");
+                    sendPhoto(chatId,"./pic2.png");
+                    sendMessage(chatId, "1.Для получения access_token, перейдите по ссылке: https://vkhost.github.io/");
+                    sendPhoto(chatId,"./pic11.png");
+                    sendMessage(chatId, "2.В настройках выберете сообщения и доступ в любое время, после чего нажмите кнопку 'получить'" );
+                    sendPhoto(chatId,"./pic12.png");
+                    sendMessage(chatId,"3.Затем разрешите доступ к вашему аккаунту и в конце выберете из полученной страницы скопируйте последовательность между access_token= и &expires_in");
+                    sendPhoto(chatId,"./pic13.png");
+                    sendPhoto(chatId,"./pic14.png");
                 }
                 default -> sendMessage(chatId, "sorry");
             }
@@ -137,6 +158,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
         message.setText(textToSend);
+
         try {
             execute(message);
         } catch (TelegramApiException e) {
@@ -144,6 +166,20 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
+    public void sendPhoto(long chatId, String uri) {
+        File forInput= new File(uri);
+        InputFile inputFile = new InputFile(forInput);
+
+        SendPhoto photo =new SendPhoto();
+        photo.setChatId(String.valueOf(chatId));
+        photo.setPhoto(inputFile);
+
+        try {
+            execute(photo);
+        } catch (TelegramApiException e) {
+            log.error("Error occured:" + e.getMessage());
+        }
+    }
     public void registerUser(Message message) {
         if (userRepository.findById(message.getChatId()).isEmpty()) {
             var chatId = message.getChatId();
