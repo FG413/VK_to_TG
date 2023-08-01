@@ -2,7 +2,6 @@ package com.example.nlmessagebot.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.time.Instant;
 import com.example.nlmessagebot.config.BotConfig;
 import com.example.nlmessagebot.model.User;
@@ -104,7 +103,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 case "/get_mydata" -> {
                     sendMessage(chatId, userRepository.findById(chatId).get().getToken() + "\n" +
                             userRepository.findById(chatId).get().getVkId());
-                    log.info(String.valueOf(userRepository.findById(chatId).get().getChatId()));
+                    log.info("User: "+ userRepository.findById(chatId));
                 }
                 case "/start" -> sendMessage(chatId, """
                         Привет! Этот бот позволит вам получить ваши непрочитанные сообщения из vk в telegram.
@@ -186,13 +185,17 @@ public class TelegramBot extends TelegramLongPollingBot {
             var scenario = 0;
             var vk_id = 0;
             var token = "vk.q";
+            var name =  message.getFrom().getFirstName() + " " + message.getFrom().getLastName();
             User user = new User();
             user.setChatId(chatId);
             user.setScenario(scenario);
             user.setVkId(vk_id);
             user.setToken(token);
+            user.setName(name);
             userRepository.save(user);
             log.info("user saved:" + user);
+
+
         }
     }
 
