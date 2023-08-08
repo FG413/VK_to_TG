@@ -1,18 +1,21 @@
 package com.example.nlmessagebot.controller;
-import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.*;
 import com.example.nlmessagebot.model.User;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 import com.example.nlmessagebot.repository.UserRepository;
 
-import java.util.Optional;
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/user")
 public class Controller {
+    @Autowired
     private UserRepository userRepository;
-    long x = 1491058767;
+
     @GetMapping
-    public User getUser(){
-        return new User(x,123,123,"1qe","qwe");
+    public ArrayList<String> getUser(){
+        ArrayList<String> list = new ArrayList<>();
+       userRepository.findAll().forEach(user -> list.add(user.getName()));
+        return list;
     }
 }
