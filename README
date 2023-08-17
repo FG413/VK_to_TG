@@ -1,0 +1,2 @@
+Команды запуска приложения на сервере.
+nohup mvnw spring-boot:run
