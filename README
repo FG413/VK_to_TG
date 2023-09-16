@@ -1,2 +1,8 @@
+Java version: 17
+PostgreSQL: 15
+
+docker run -d -p 5432:5432 --name postgres -e POSTGRES_PASSWORD=password postgres:15
+
 Команды запуска приложения на сервере.
-nohup mvnw spring-boot:run
+
+nohup ./mvnw spring-boot:run > nohup.txt &

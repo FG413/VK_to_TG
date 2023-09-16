@@ -1,16 +1,12 @@
 package com.example.nlmessagebot.service;
 
-import java.io.File;
-import java.io.IOException;
-import java.time.Instant;
 import com.example.nlmessagebot.config.BotConfig;
-import com.example.nlmessagebot.model.User;
 import com.example.nlmessagebot.repository.UserRepository;
+import com.example.nlmessagebot.repository.entity.User;
 import com.vk.api.sdk.client.actors.UserActor;
 import com.vk.api.sdk.exceptions.ApiAuthException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
@@ -23,7 +19,8 @@ import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.lang.String;
+import java.io.File;
+import java.time.Instant;
 import java.util.List;
 
 @Slf4j
@@ -31,18 +28,11 @@ import java.util.List;
 public class TelegramBot extends TelegramLongPollingBot {
 
     private final BotConfig config;
-    @Autowired
-    private UserRepository userRepository;
-    File file = new File("./dog.jpg");
+    private final UserRepository userRepository;
 
-
-
-
-
-
-
-    public TelegramBot(BotConfig config) throws IOException {
+    public TelegramBot(BotConfig config, UserRepository userRepository) {
         this.config = config;
+        this.userRepository = userRepository;
         List<BotCommand> commands = List.of(
                 new BotCommand("/get_messages", "get last 4 unread messages"),
                 new BotCommand("/get_mydata", "get actual id and token"),
@@ -179,6 +169,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             log.error("Error occured:" + e.getMessage());
         }
     }
+
     public void registerUser(Message message) {
         if (userRepository.findById(message.getChatId()).isEmpty()) {
             var chatId = message.getChatId();
@@ -194,9 +185,6 @@ public class TelegramBot extends TelegramLongPollingBot {
             user.setName(name);
             userRepository.save(user);
             log.info("user saved:" + user);
-
-
         }
     }
-
 }

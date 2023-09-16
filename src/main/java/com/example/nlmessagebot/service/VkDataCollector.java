@@ -1,6 +1,9 @@
 package com.example.nlmessagebot.service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.vk.api.sdk.client.VkApiClient;
@@ -17,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 public class VkDataCollector {
     public final static VkApiClient vk = new VkApiClient(new HttpTransportClient());
 
-
     public static List<MessageData> getUnreadMessages(UserActor actor) throws ApiException, ClientException {
         List<Conversation> conversations = vk.messages()
                 .getConversations(actor)
@@ -27,7 +29,7 @@ public class VkDataCollector {
                 .map(ConversationWithMessage::getConversation).toList();
 
         Map<Integer, Integer> conversationToUnreadMessages = new HashMap<>();
-        conversations.stream().map(c -> conversationToUnreadMessages.put(c.getPeer().getId(),c.getUnreadCount())).collect(Collectors.toList());
+        conversations.forEach(c -> conversationToUnreadMessages.put(c.getPeer().getId(), c.getUnreadCount()));
         List<MessageData> unreadMessages = new ArrayList<>();
         for (Map.Entry<Integer, Integer> conversationToUnreadMessagesCount : conversationToUnreadMessages.entrySet()) {
             if (conversationToUnreadMessagesCount.getValue() == null) {
